@@ -26,6 +26,7 @@ function logger(severity, message) {
 
         default:
             console.error(`${logPrefix} (${Date.now()}): Wrong severity parameter!`);
+            break;
 
     }
 }

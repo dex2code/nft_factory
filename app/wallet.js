@@ -1,10 +1,7 @@
 async function checkWalletConnected() {
     logger('debug', `Checking the Ethereum provider is connected...`);
 
-    let result = await window.ethereum.isConnected();
-
-    if (result === true) { logger('debug', `Ethereum provider is online (${result})`); }
-    else { logger('warning', `Ethereum provider is offline (${result})`); }
+    let result = (await window.ethereum.isConnected) ? logger('debug', `Ethereum provider is online`) : logger('error', `Ethereum provider is offline`);
 
     return result;
 }
@@ -15,7 +12,7 @@ async function checkWalletIsInstalled() {
 
     if (typeof window.ethereum != 'undefined') {
 
-        let walletType = (window.ethereum.isMetaMask) ? 'metamask' : 'ethereum-compatible';
+        let walletType = (await window.ethereum.isMetaMask) ? 'metamask' : 'ethereum-compatible';
         logger('debug', `Found installed wallet (${walletType})`);
 
         $('#btn-connect-wallet').addClass('btn-outline-primary');
@@ -82,11 +79,7 @@ async function connectWallet() {
 
     logger('debug', `Connected account ${activeWalletAccount}`);
     
-    if (await checkWalletChainId() === true) {
-        walletConnected();
-    } else {
-        await setWalletChainId();
-    }
+    (await checkWalletChainId()) ? walletConnected() : await setWalletChainId();
 
     return;
 }
@@ -174,7 +167,6 @@ async function walletConnected() {
 
         window.ethereum.on('accountsChanged', handleAccountsChanged);
         window.ethereum.on('chainChanged', handleChainChanged);
-        window.ethereum.on('disconnect', handleWalletDisconnected);
     } else {
         logger('warning', `Wallet is not connected because of (${walletAccounts[0]} =?= ${activeWalletAccount}) or (${walletChainId} =?= ${appChainId})`);
 
@@ -198,7 +190,6 @@ async function disconnectWallet() {
 
     window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
     window.ethereum.removeListener('chainChanged', handleChainChanged);
-    window.ethereum.removeListener('disconnect', handleWalletDisconnected);
 
     return;
 }
@@ -219,8 +210,12 @@ async function getWalletAccounts() {
 
     } catch (err) {
 
-        if (err.code === 4001) { logger('warning', `User canceled the connection request (Code: ${err.code})`); } 
-        else { logger('warning', `An error occured during the wallet connection (Code: ${err.code})`); }
+        if (err.code === 4001) {
+            logger('warning', `User canceled the connection request (Code: ${err.code})`);
+        }
+        else {
+            logger('warning', `An error occured during the wallet connection (Code: ${err.code})`);
+        }
 
         return null;
     }
@@ -281,10 +276,14 @@ async function checkWalletChainId() {
 }
 
 
-async function handleAccountsChanged() {
+async function handleAccountsChanged(accounts) {
     logger('debug', `Handling accountsChanged event...`);
 
     disconnectWallet();
+
+    if (accounts.length > 0) {
+        await connectWallet();
+    }
 
     return;
 }
@@ -299,16 +298,8 @@ async function handleChainChanged() {
         logger('warning', `User changed wallet chainId to incorrect value (${appChainId} => ${walletChainId})`);
 
         disconnectWallet();
+        window.location.reload();
     }
-
-    return;
-}
-
-
-async function handleWalletDisconnected() {
-    logger('warning', `Ethereum provider disconnected!`);
-
-    disconnectWallet();
 
     return;
 }
