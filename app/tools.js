@@ -1,4 +1,4 @@
-function logger(severity, message) {
+async function logger(severity, message) {
 
     if (typeof severity !== 'string' || typeof message !== 'string') {
         console.error(`${logPrefix} (${Date.now()}): Wrong logger parameters!`);

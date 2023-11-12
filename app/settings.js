@@ -10,6 +10,9 @@ var displayWalletAccount = null;
 const appDebug = true;
 
 
+const appSmartContract = '0x0123456789012345678901234567890123456789';
+
+
 /*
 const appChainId = '0x89';
 const appChainName = 'Polygon Mainnet';
