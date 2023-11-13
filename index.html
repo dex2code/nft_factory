@@ -15,7 +15,7 @@
 
     <body>
 
-        <!-- About -->
+        <!-- SC Address -->
         <div class="container bg-transparent text-end text-uppercase fs-5 text-secondary">
             <br />
             <span id="span-smart-contract" data-bs-toggle="tooltip" data-bs-placement="bottom" title=""></span>
@@ -25,7 +25,7 @@
                 </svg>
             </span>
         </div>
-        <!-- End About -->
+        <!-- End SC Address -->
 
 
         <!-- navBar -->
@@ -50,9 +50,9 @@
 
 
         <!-- Toast -->
-        <div class="toast-container position-fixed bottom-0 end-0 p-2 bg-transparent" style="z-index: 11" onclick="$('.toast').toast('hide');">
-            <div class="toast hide bg-transparent" role="alert" aria-live="assertive" aria-atomic="true">
-                <div id="toast-body" class="toast-body bg-opacity-50 h3 text-light">
+        <div class="toast-container position-fixed bottom-0 end-0 p-2 bg-transparent" style="z-index: 11" onclick="$('#toast-div').toast('hide');">
+            <div id="toast-div" class="toast hide bg-transparent" role="alert" aria-live="assertive" aria-atomic="true" data-bs-animation="true" data-bs-autohide="true" data-bs-delay="3000">
+                <div id="toast-body" class="toast-body bg-opacity-50 h4 text-light">
                     <span id="toast-text"></span>
                 </div>
             </div>
@@ -62,9 +62,6 @@
 
         <script type="text/javascript" src="/lib/bootstrap.bundle_5.3.2.min.js"></script>
         <script type="text/javascript" src="/lib/jquery_3.7.1.min.js"></script>
-        <script type="module">
-            import {ethers} from "/lib/ethers_6.7.0.min.js"
-        </script>
 
         <script type="text/javascript" src="/app/settings.js"></script>
         <script type="text/javascript" src="/app/tools.js"></script>

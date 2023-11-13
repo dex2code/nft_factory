@@ -42,5 +42,5 @@ async function showToast(success, message) {
 
     $('#toast-text').text(message);
 
-    $('.toast').toast('show');
+    $('#toast-div').toast('show');
 }
