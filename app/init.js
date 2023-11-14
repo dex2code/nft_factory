@@ -19,3 +19,50 @@ $('#copy-smart-contract').on('click', async function() {
     showToast(true, 'Copied SC address to clipboard!');
     return;
 });
+
+const $pngCanvas = $('#pngCanvas');
+
+$('#pngButton').on('change', function() {
+
+    if (this.files && this.files[0] && this.files[0].type.match(/^image\//)) {
+
+        let fr = new FileReader();
+
+        fr.onload = function(evt) {
+
+            let pngImage = new Image();
+
+            pngImage.onload = function() {
+
+                $pngCanvas.cropper({
+                    viewMode: 3,
+                    aspectRatio: 1 / 1,
+                    dragMode: 'move',
+                    autoCrop: true,
+                    autoCropArea: 1.0,
+                    restore: false,
+                    guides: true,
+                    modal: false,
+                    center: true,
+                    highlight: true,
+                    cropBoxMovable: false,
+                    cropBoxResizable: false,
+                    toggleDragModeOnDblclick: false,
+                });
+
+                let cropper = $pngCanvas.data('cropper');
+                cropper.replace(pngImage.src);
+            
+            }
+
+            pngImage.src = evt.target.result;
+
+        }
+
+        fr.readAsDataURL(this.files[0]);
+
+    } else { 
+        $('#pngForm').trigger('reset');
+        showToast(false, `No .PNG file choosen!`);
+    }
+});

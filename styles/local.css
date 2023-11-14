@@ -11,3 +11,8 @@ a {
     text-decoration: none;
     color: blueviolet;
 }
+
+img {
+    display: block;
+    max-width: 100%;
+}
