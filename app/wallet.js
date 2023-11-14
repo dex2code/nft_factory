@@ -1,54 +1,135 @@
-async function checkWalletConnected() {
-    logger('debug', `Checking the Ethereum provider is connected...`);
+async function getWalletAccounts() {
+    logger('debug', `(getWalletAccounts) -- Requesting wallet accounts...`);
 
-    let result = (await window.ethereum.isConnected) ? logger('debug', `Ethereum provider is online`) : logger('error', `Ethereum provider is offline`);
+    let walletAccounts = new Array();
+
+    try {
+
+        walletAccounts = await window.ethereum.request(
+            {
+                method: 'eth_requestAccounts',
+                params: [],
+            });
+
+    } catch (err) {
+
+        if (err.code === 4001) {
+            logger('warning', `(getWalletAccounts) -- User canceled the connection request (Code: ${err.code})`);
+        }
+        else {
+            logger('warning', `(getWalletAccounts) -- An error occured during the wallet connection (Code: ${err.code})`);
+        }
+
+        return null;
+    }
+
+    logger('debug', `(getWalletAccounts) -- Received walletAccounts: (${walletAccounts})`);
+
+    return walletAccounts;
+}
+
+
+async function getWalletChainId() {
+    logger('debug', `(getWalletChainId) -- Requesting wallet chainId...`);
+
+    let walletChainId = null;
+
+    try {
+
+        walletChainId = await window.ethereum.request(
+            {
+                method: 'eth_chainId',
+                params: [],
+            });
+    
+    } catch (err) {
+
+        logger('warning', `(getWalletChainId) -- Cannot get wallet chainId (Code: ${err.code})`);
+
+        return null;
+    }
+
+    logger('debug', `(getWalletChainId) -- Received wallet chainId: (${walletChainId})`);
+
+    return walletChainId;
+}
+
+
+async function checkWalletInstalled() {
+    logger('debug', `(checkWalletInstalled) -- Checking the Ethereum wallet is installed...`);
+
+    if (typeof window.ethereum == 'undefined') {
+        logger('warning', `(checkWalletInstalled) -- No Ethereum Wallet found`);
+        return false;
+    } else {
+        logger('debug', `(checkWalletInstalled) -- Found installed Ethereum Wallet`);
+        return true;
+    }
+}
+
+
+async function checkWalletConnected() {
+    logger('debug', `(checkWalletConnected) -- Checking the Ethereum provider is connected...`);
+
+    let result = await window.ethereum.isConnected() ? logger('debug', `(checkWalletConnected) -- Ethereum provider is online`) : logger('warning', `(checkWalletConnected) -- Ethereum provider is offline`);
 
     return result;
 }
 
 
-async function checkWalletIsInstalled() {
-    logger('debug', `Looking for installed wallet...`);
+async function checkWalletChainId() {
+    logger('debug', `(checkWalletChainId) -- Checking wallet chainId...`);
 
-    if (typeof window.ethereum != 'undefined') {
+    let walletChainId = await getWalletChainId();
 
-        let walletType = (await window.ethereum.isMetaMask) ? 'metamask' : 'ethereum-compatible';
-        logger('debug', `Found installed wallet (${walletType})`);
+    if (walletChainId === null) {
+        logger('warning', `(checkWalletChainId) -- No wallet chainId found: (${walletChainId})`);
+
+        disconnectWallet();
+        return false;
+    }
+
+    if (walletChainId !== appChainId) {
+        logger('warning', `(checkWalletChainId) -- User wallet has wrong chainId ${walletChainId} (expected ${appChainId})`);
+
+        return false;
+    } else {
+        logger('debug', `(checkWalletChainId) -- User wallet has correct chainId (${walletChainId})`);
+
+        return true;
+    }
+}
+
+
+async function initWallet() {
+
+    if (await checkWalletInstalled() === true) {
 
         $('#btn-connect-wallet').addClass('btn-outline-primary');
         $('#span-connect-wallet').text('Connect');
         $('#btn-connect-wallet').off('click');
-        $('#btn-connect-wallet').click(connectWallet);
+        $('#btn-connect-wallet').click(function() { connectWallet(); });
 
     }
     else {
 
-        logger('warning', `Wallet is not installed`);
-
         $('#btn-connect-wallet').addClass('btn-outline-danger');
         $('#span-connect-wallet').text('Install');
         $('#btn-connect-wallet').off('click');
-        $('#btn-connect-wallet').click(openWalletInstallationPage);
+        $('#btn-connect-wallet').click(function() { window.open(walletDownloadURL); });
 
     }
 
-    return;
-}
-
-
-async function openWalletInstallationPage() {
-    logger('debug', `Opening wallet installation page (${walletDownloadURL})...`);
-
-    window.open(walletDownloadURL);
     return;
 }
 
 
 async function connectWallet() {
-    logger('debug', `Connecting wallet...`);
+    logger('debug', `(connectWallet) -- Connecting wallet...`);
 
     if (await checkWalletConnected() === false) {
-        logger('warning', `Cannot connect wallet because Ethereum provider is offline`);
+        logger('warning', `(connectWallet) -- Cannot connect wallet because Ethereum provider is offline`);
+        showToast(false, `Ethereum provider is offline`);
 
         disconnectWallet();
         return;
@@ -57,36 +138,29 @@ async function connectWallet() {
     let walletAccounts = await getWalletAccounts();
 
     if (walletAccounts === null || walletAccounts.length === 0) {
-        logger('warning', `No walletAccounts found: (${walletAccounts})`);
+        logger('warning', `(connectWallet) -- No walletAccounts found: (${walletAccounts})`);
+        showToast(false, `Please connect your wallet to continue!`);
+
 
         disconnectWallet();
         return;
     }
 
-    logger('debug', `Received walletAccounts: (${walletAccounts})`);
+    logger('debug', `(connectWallet) -- Received walletAccounts: (${walletAccounts})`);
 
-    if (activeWalletAccount !== walletAccounts[0]) {
-        logger('debug', `Connecting account ${walletAccounts[0]}...`);
+    activeWalletAccount = walletAccounts[0];
+    displayWalletAccount = activeWalletAccount.substr(0, 4) + ' ... ' + activeWalletAccount.substr(activeWalletAccount.length - 4, activeWalletAccount.length - 1);
 
-        activeWalletAccount = walletAccounts[0];
-        displayWalletAccount = activeWalletAccount.substr(0, 4) + ' ... ' + activeWalletAccount.substr(activeWalletAccount.length - 4, activeWalletAccount.length - 1);
-
-        $('#btn-connect-wallet').removeClass('btn-outline-primary').addClass('btn-outline-success');
-        $('#span-connect-wallet').text(displayWalletAccount);
-        $('#btn-connect-wallet').off('click');
-        $('#btn-connect-wallet').click(disconnectWallet);
-    }
-
-    logger('debug', `Connected account ${activeWalletAccount}`);
+    logger('debug', `(connectWallet) -- account ${activeWalletAccount} will be used`);
     
-    (await checkWalletChainId()) ? walletConnected() : await setWalletChainId();
+    (await checkWalletChainId()) ? await walletConnected() : await setWalletChainId();
 
     return;
 }
 
 
 async function setWalletChainId() {
-    logger('debug', `Setting correct chainId (${appChainId})`);
+    logger('debug', `(setWalletChainId) -- Setting correct chainId (${appChainId})`);
 
     try {
 
@@ -99,14 +173,15 @@ async function setWalletChainId() {
     } catch (err) {
 
         if (err.code === 4902) {
-            logger('warning', `chaiId ${appChainId} is not presented (Code: ${err.code}). Trying to add...`);
+            logger('warning', `(setWalletChainId) -- chaiId ${appChainId} is not presented (Code: ${err.code}). Trying to add...`);
 
             if (await addWalletChainId() === false) {
                 disconnectWallet();
                 return;
             }
-        } else {
-            logger('warning', `Cannot set correct chainId: (Code: ${err.code})`);
+        } else if (err.code === 4001) {
+            logger('warning', `(setWalletChainId) -- User cancelled request to change the network: (Code: ${err.code})`);
+            showToast(false, `Please switch your wallet to '${appChainName}'`);
 
             disconnectWallet();
             return;
@@ -114,14 +189,14 @@ async function setWalletChainId() {
 
     }
 
-    walletConnected();
+    await walletConnected();
 
     return;
 }
 
 
 async function addWalletChainId() {
-    logger('debug', `Adding correct wallet chainId ${appChainId}...`);
+    logger('debug', `(addWalletChainId) -- Adding correct wallet chainId ${appChainId}...`);
 
     chainDetails = {
         chainId: appChainId,
@@ -141,34 +216,48 @@ async function addWalletChainId() {
     } catch (err) {
 
         if (err.code === 4001) {
-            logger('warning', `User cancelled the request (Code: ${err.code})`);    
+            logger('warning', `(addWalletChainId) -- User cancelled the request (Code: ${err.code})`);
+            showToast(false, `Please add network '${appChainName}' to continue.`);
         } else {
-            logger('warning', `Cannot add chainId with details (${JSON.stringify(chainDetails)}) (Code: ${err.code})`);
+            logger('warning', `(addWalletChainId) -- Cannot add chainId with details (${JSON.stringify(chainDetails)}) (Code: ${err.code})`);
+            showToast(false, `Cannot add network '${appChainName}'. Check your wallet and try again.`);
         }
 
         return false;
 
     }
 
-    logger('debug', `Added correct wallet chainId ${appChainId}`);
+    logger('debug', `(addWalletChainId) -- Added correct wallet chainId ${appChainId}`);
 
     return true;
 }
 
 
 async function walletConnected() {
-    logger('debug', `Final wallet checking...`);
+    logger('debug', `(walletConnected) -- Final wallet checking...`);
 
     let walletAccounts = await getWalletAccounts();
     let walletChainId = await getWalletChainId();
 
     if (walletAccounts[0] === activeWalletAccount && walletChainId === appChainId) {
-        logger('debug', `Wallet is finally connected with account (${walletAccounts[0]} === ${activeWalletAccount}) and (${walletChainId} === ${appChainId})`);
+        logger('debug', `(walletConnected) -- Wallet is finally connected with account (${walletAccounts[0]} === ${activeWalletAccount}) and correct network (${walletChainId} === ${appChainId})`);
+        showToast(true, `Your wallet successfully connected to the app!`);
+
+        $('#btn-connect-wallet').removeClass('btn-outline-primary');
+        $('#btn-connect-wallet').removeClass('btn-outline-danger');
+        $('#btn-connect-wallet').removeClass('btn-outline-success');
+        $('#btn-connect-wallet').addClass('btn-outline-success');
+
+        $('#btn-connect-wallet').off('click');
+        $('#btn-connect-wallet').click(function() { disconnectWallet(true); });
+
+        $('#span-connect-wallet').text(displayWalletAccount);
 
         window.ethereum.on('accountsChanged', handleAccountsChanged);
         window.ethereum.on('chainChanged', handleChainChanged);
     } else {
-        logger('warning', `Wallet is not connected because of (${walletAccounts[0]} =?= ${activeWalletAccount}) or (${walletChainId} =?= ${appChainId})`);
+        logger('warning', `(walletConnected) -- Wallet is not connected because of (${walletAccounts[0]} =?= ${activeWalletAccount}) or (${walletChainId} =?= ${appChainId})`);
+        showToast(false, `Check your wallet settings and try again.`);
 
         disconnectWallet();
     }
@@ -177,112 +266,36 @@ async function walletConnected() {
 }
 
 
-async function disconnectWallet() {
-    logger('debug', `Disconnecting wallet...`);
+async function disconnectWallet(toast = false) {
+    logger('debug', `(disconnectWallet) -- Disconnecting wallet...`);
+    if (toast === true) { showToast(false, `Wallet disconnected`); }
 
     activeWalletAccount = null;
     displayWalletAccount = null;
 
-    $('#btn-connect-wallet').removeClass('btn-outline-success').addClass('btn-outline-primary');
-    $('#span-connect-wallet').text('Connect');
-    $('#btn-connect-wallet').off('click');
-    $('#btn-connect-wallet').click(connectWallet);
-
     window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
     window.ethereum.removeListener('chainChanged', handleChainChanged);
+
+    $('#btn-connect-wallet').removeClass('btn-outline-success');
+    $('#btn-connect-wallet').removeClass('btn-outline-primary');
+    $('#btn-connect-wallet').removeClass('btn-outline-danger');
+    $('#span-connect-wallet').text('');
+    $('#btn-connect-wallet').off('click');
+
+    initWallet();
 
     return;
 }
 
 
-async function getWalletAccounts() {
-    logger('debug', `Requesting wallet accounts...`);
-
-    let walletAccounts = new Array();
-
-    try {
-
-        walletAccounts = await window.ethereum.request(
-            {
-                method: 'eth_requestAccounts',
-                params: [],
-            });
-
-    } catch (err) {
-
-        if (err.code === 4001) {
-            logger('warning', `User canceled the connection request (Code: ${err.code})`);
-        }
-        else {
-            logger('warning', `An error occured during the wallet connection (Code: ${err.code})`);
-        }
-
-        return null;
-    }
-
-    logger('debug', `Received walletAccounts: (${walletAccounts})`);
-
-    return walletAccounts;
-}
-
-
-async function getWalletChainId() {
-    logger('debug', `Requesting wallet chainId...`);
-
-    let walletChainId = null;
-
-    try {
-
-        walletChainId = await window.ethereum.request(
-            {
-                method: 'eth_chainId',
-                params: [],
-            });
-    
-    } catch (err) {
-
-        logger('warning', `Cannot get wallet chainId (Code: ${err.code})`);
-
-        return null;
-    }
-
-    logger('debug', `Received wallet chainId: (${walletChainId})`);
-
-    return walletChainId;
-}
-
-
-async function checkWalletChainId() {
-    logger('debug', `Checking wallet chainId...`);
-
-    let walletChainId = await getWalletChainId();
-
-    if (walletChainId === null) {
-        logger('warning', `No wallet chainId found: (${walletChainId})`);
-
-        disconnectWallet();
-        return false;
-    }
-
-    if (walletChainId !== appChainId) {
-        logger('warning', `User wallet has wrong chainId ${walletChainId} (expected ${appChainId})`);
-
-        return false;
-    } else {
-        logger('debug', `User wallet has correct chainId (${walletChainId})`);
-
-        return true;
-    }
-}
-
-
 async function handleAccountsChanged(accounts) {
-    logger('debug', `Handling accountsChanged event...`);
-
-    disconnectWallet();
+    logger('debug', `(handleAccountsChanged) -- Handling accountsChanged event...`);
 
     if (accounts.length > 0) {
-        await connectWallet();
+        disconnectWallet();
+        connectWallet();
+    } else {
+        disconnectWallet(true);
     }
 
     return;
@@ -290,7 +303,7 @@ async function handleAccountsChanged(accounts) {
 
 
 async function handleChainChanged() {
-    logger('debug', `Handling chainChanged event...`);
+    logger('debug', `(handleChainChanged) -- Handling chainChanged event...`);
 
     let walletChainId = await getWalletChainId();
 
