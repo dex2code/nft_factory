@@ -54,7 +54,6 @@
         <!-- Cropper -->
         <form id="pngForm">
             <div class="form-group container bg-transparent">
-                <label for="pngButton">Please select file</label><br />
                 <input type="file" class="form-control-sm" id="pngButton" accept="image/*" />
             </div>
         </form>
@@ -62,8 +61,14 @@
         <br />
 
         <div class="container bg-transparent">
+            <div style="max-width: 350px; max-height: 350px; min-width: 350px; min-height: 350px;">
+                <img id="pngCanvas" src="assets/imgTemplate.png"/>
+            </div><br />
             <div>
-                <img id="pngCanvas" />
+                <input id="imgButton" type="button" value="Result" />
+            </div><br />
+            <div>
+                <img id="imgResult"/>
             </div>
         </div>
         

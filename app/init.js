@@ -20,7 +20,27 @@ $('#copy-smart-contract').on('click', async function() {
     return;
 });
 
+
 const $pngCanvas = $('#pngCanvas');
+
+$pngCanvas.cropper({
+    viewMode: 3,
+    aspectRatio: 1 / 1,
+    dragMode: 'move',
+    autoCrop: true,
+    autoCropArea: 1.0,
+    restore: false,
+    guides: true,
+    modal: false,
+    center: true,
+    highlight: true,
+    cropBoxMovable: true,
+    cropBoxResizable: false,
+    toggleDragModeOnDblclick: false,
+});
+
+var cropper = $pngCanvas.data('cropper');
+
 
 $('#pngButton').on('change', function() {
 
@@ -33,36 +53,25 @@ $('#pngButton').on('change', function() {
             let pngImage = new Image();
 
             pngImage.onload = function() {
-
-                $pngCanvas.cropper({
-                    viewMode: 3,
-                    aspectRatio: 1 / 1,
-                    dragMode: 'move',
-                    autoCrop: true,
-                    autoCropArea: 1.0,
-                    restore: false,
-                    guides: true,
-                    modal: false,
-                    center: true,
-                    highlight: true,
-                    cropBoxMovable: false,
-                    cropBoxResizable: false,
-                    toggleDragModeOnDblclick: false,
-                });
-
-                let cropper = $pngCanvas.data('cropper');
                 cropper.replace(pngImage.src);
-            
             }
 
             pngImage.src = evt.target.result;
-
         }
-
         fr.readAsDataURL(this.files[0]);
 
     } else { 
         $('#pngForm').trigger('reset');
-        showToast(false, `No .PNG file choosen!`);
+        showToast(false, `No Image file choosen!`);
     }
+});
+
+
+$('#imgButton').on('click', function() {
+
+    let imgResult = cropper.getCroppedCanvas( { width: 350, height: 350 } );
+    let imgResultURL = imgResult.toDataURL();
+
+    $('#imgResult').attr('src', imgResultURL);
+    
 });
