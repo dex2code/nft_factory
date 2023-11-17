@@ -254,6 +254,8 @@ async function walletConnected() {
 
         $('#span-connect-wallet').text(displayWalletAccount);
 
+        $('#nftUpload').attr('disabled', false);
+
         window.ethereum.on('accountsChanged', handleAccountsChanged);
         window.ethereum.on('chainChanged', handleChainChanged);
 
@@ -285,6 +287,8 @@ async function disconnectWallet(toast = false) {
     $('#btn-connect-wallet').removeClass('btn-outline-danger');
     $('#span-connect-wallet').text('');
     $('#btn-connect-wallet').off('click');
+
+    $('#nftUpload').attr('disabled', true);
 
     initWallet();
 
