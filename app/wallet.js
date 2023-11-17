@@ -181,7 +181,13 @@ async function setWalletChainId() {
             }
         } else if (err.code === 4001) {
             logger('warning', `(setWalletChainId) -- User cancelled request to change the network: (Code: ${err.code})`);
-            showToast(false, `Please switch your wallet to '${appChainName}'`);
+            showToast(false, `Please switch your wallet to ${appChainName}`);
+
+            disconnectWallet();
+            return;
+        } else {
+            logger('warning', `(setWalletChainId) -- Unknown problem: (Code: ${err.code})`);
+            showToast(false, `Cannot switch your wallet to ${appChainName}`);
 
             disconnectWallet();
             return;
