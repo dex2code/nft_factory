@@ -1,7 +1,7 @@
 async function logger(severity, message) {
 
-    if (typeof severity !== 'string' || typeof message !== 'string') {
-        console.error(`${logPrefix} (${Date.now()}): Wrong logger parameters!`);
+    if (typeof severity !== 'string') {
+        console.error(`${logPrefix} (${Date.now()}): Wrong severity parameter!`);
     }
 
     switch (severity) {
@@ -43,4 +43,33 @@ async function showToast(success, message) {
     $('#toast-text').text(message);
 
     $('#toast-div').toast('show');
+
+}
+
+
+function dataURItoBlob(dataURI) {
+
+    let byteString;
+
+    if (dataURI.split(',')[0].indexOf('base64') >= 0) {
+
+        byteString = atob(dataURI.split(',')[1]);
+
+    } else {
+
+        byteString = unescape(dataURI.split(',')[1]);
+
+    }
+
+    let mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    let ia = new Uint8Array(byteString.length);
+
+    for (let i = 0; i < byteString.length; i++) {
+
+        ia[i] = byteString.charCodeAt(i);
+
+    }
+
+    return new Blob([ia], {type:mimeString});
+
 }

@@ -7,23 +7,29 @@ $('#copy-smart-contract').on('click', async function() {
     logger('debug', `Trying to copy text '${appSmartContract}' to clipboard`);
 
     try {
+
         await navigator.clipboard.writeText(appSmartContract);
+
     } catch(err) {
+
         logger('warning', `Cannot copy text '${appSmartContract}' to clipboard (${err})`);
         showToast(false, 'Error copying to clipboard, check your browser permissions!');
 
         return;
+
     }
 
     logger('debug', `Copied text '${appSmartContract}' to clipboard`);
     showToast(true, 'Copied SC address to clipboard!');
+
     return;
+
 });
 
 
-const $pngCanvas = $('#pngCanvas');
+const $imgCanvas = $('#imgCanvas');
 
-$pngCanvas.cropper({
+$imgCanvas.cropper({
     viewMode: 3,
     aspectRatio: 1 / 1,
     dragMode: 'move',
@@ -39,10 +45,10 @@ $pngCanvas.cropper({
     toggleDragModeOnDblclick: false,
 });
 
-var cropper = $pngCanvas.data('cropper');
+var cropper = $imgCanvas.data('cropper');
 
 
-$('#pngButton').on('change', function() {
+$('#imgUploadButton').on('change', function() {
 
     if (this.files && this.files[0] && this.files[0].type.match(/^image\//)) {
 
@@ -50,28 +56,30 @@ $('#pngButton').on('change', function() {
 
         fr.onload = function(evt) {
 
-            let pngImage = new Image();
+            let nftImage = new Image();
 
-            pngImage.onload = function() {
-                cropper.replace(pngImage.src);
+            nftImage.onload = function() {
+                cropper.replace(nftImage.src);
             }
-
-            pngImage.src = evt.target.result;
+            nftImage.src = evt.target.result;
         }
         fr.readAsDataURL(this.files[0]);
 
     } else { 
-        $('#pngForm').trigger('reset');
+
+        $('#imgForm').trigger('reset');
         showToast(false, `No Image file choosen!`);
+
     }
 });
 
 
-$('#imgButton').on('click', function() {
+if (typeof Cookies.get('nftStorageKey') == 'undefined') {
 
-    let imgResult = cropper.getCroppedCanvas( { width: 350, height: 350 } );
-    let imgResultURL = imgResult.toDataURL();
+    $('#nftStorageKey').text(nftStorageKey);
 
-    $('#imgResult').attr('src', imgResultURL);
-    
-});
+} else {
+
+    $('#nftStorageKey').text(Cookies.get('nftStorageKey'));
+
+}

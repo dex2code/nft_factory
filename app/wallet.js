@@ -240,6 +240,7 @@ async function walletConnected() {
     let walletChainId = await getWalletChainId();
 
     if (walletAccounts[0] === activeWalletAccount && walletChainId === appChainId) {
+
         logger('debug', `(walletConnected) -- Wallet is finally connected with account (${walletAccounts[0]} === ${activeWalletAccount}) and correct network (${walletChainId} === ${appChainId})`);
         showToast(true, `Your wallet successfully connected to the app!`);
 
@@ -255,11 +256,14 @@ async function walletConnected() {
 
         window.ethereum.on('accountsChanged', handleAccountsChanged);
         window.ethereum.on('chainChanged', handleChainChanged);
+
     } else {
+
         logger('warning', `(walletConnected) -- Wallet is not connected because of (${walletAccounts[0]} =?= ${activeWalletAccount}) or (${walletChainId} =?= ${appChainId})`);
         showToast(false, `Check your wallet settings and try again.`);
 
         disconnectWallet();
+
     }
 
     return;

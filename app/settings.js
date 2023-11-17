@@ -34,3 +34,6 @@ const appChainCurrency = {
     symbol: 'MATIC',
     decimals: 18,
 };
+
+
+const nftStorageKey = null;
