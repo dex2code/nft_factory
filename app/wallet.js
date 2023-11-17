@@ -268,7 +268,9 @@ async function walletConnected() {
     } else {
 
         logger('warning', `(walletConnected) -- Wallet is not connected because of (${walletAccounts[0]} =?= ${activeWalletAccount}) or (${walletChainId} =?= ${appChainId})`);
-        showToast(false, `Check your wallet settings and try again.`);
+        
+        if (walletAccounts[0] !== activeWalletAccount) { showToast(false, `Check your wallet account and try again.`); }
+        if (walletChainId !== appChainId) { showToast(false, `Check your wallet network and try again.`); }
 
         disconnectWallet();
 
