@@ -85,6 +85,9 @@ async function mintMyNFT() {
     } else {
         logger('error', `Cannot load contract ABI (${r.status})`);
         showToast(false, 'Cannot mint NFT (ABI problem)');
+
+        $('#minting-spinner').addClass('visually-hidden');
+        $('#nftMint').prop('disabled', false);
         
         return false;
     }
@@ -99,6 +102,11 @@ async function mintMyNFT() {
     } catch (err) {
         logger('error', `Cannot prepare Web3 objects: ${err}`);
         showToast(false, 'Cannot mint NFT (Web3 problem)');
+
+        $('#minting-spinner').addClass('visually-hidden');
+        $('#nftMint').prop('disabled', false);
+
+        return false;
     }
     logger('debug', `Prepared Web3 objects successfully:`);
     logger('debug', `Provider:  ${JSON.stringify(provider)}`);
@@ -112,9 +120,10 @@ async function mintMyNFT() {
         rc = await tx.wait();
     } catch(err) {
         logger('error', `TX is broken: ${err}`);
+        showToast(false, `SmartContract TX error!`);
+
         $('#minting-spinner').addClass('visually-hidden');
         $('#nftMint').prop('disabled', false);
-        showToast(false, `SmartContract TX error!`);
         
         return false;
     }
@@ -122,12 +131,12 @@ async function mintMyNFT() {
     logger('debug', `TX done: ${JSON.stringify(tx)}`);
     logger('debug', `RC data: ${JSON.stringify(rc)}`);
     logger('debug', `TX Returns: ${rc.logs[1]['data']}`);
-
-    let nftNumber = Number(rc.logs[1]['data']);
+    showToast(true, `Minted!`);
 
     $('#minting-spinner').addClass('visually-hidden');
     $('#nftMint').prop('disabled', false);
-    showToast(true, `Minted!`);
+
+    let nftNumber = Number(rc.logs[1]['data']);
 
     return nftNumber;
 }
