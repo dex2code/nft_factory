@@ -91,7 +91,7 @@ async function mintMyNFT() {
         
         return false;
     }
-    logger('debug', `Readed contract ABI successfully: ${contractABI}`);
+    logger('debug', `Readed contract ABI successfully`);
 
 
     let provider, signer, contract;
