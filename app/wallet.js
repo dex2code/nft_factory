@@ -187,7 +187,7 @@ async function setWalletChainId() {
             return;
         } else {
             logger('warning', `(setWalletChainId) -- Unknown problem: (Code: ${err.code})`);
-            showToast(false, `Cannot switch your wallet to ${appChainName}`);
+            showToast(false, `Cannot switch your wallet to ${appChainName} (${err.code})`);
 
             disconnectWallet();
             return;
