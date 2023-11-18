@@ -5,19 +5,19 @@ async function mintMyNFT() {
 
     if(!activeWalletAccount) {
         showToast(false, 'Connect your wallet first!');
-        return;
+        return false;
     }
 
     const nftStorageKey = $('#nftStorageKey').val();
     if (!nftStorageKey) {
         showToast(false, 'Please set NFT.Storage API key!');
-        return;
+        return false;
     }
 
     const nftName = $('#nftName').val();
     if (!nftName) {
         showToast(false, 'Please set Name of your NFT!');
-        return;
+        return false;
     }
 
     const nftDescription = $('#nftDescription').val();
@@ -63,7 +63,7 @@ async function mintMyNFT() {
     
         showToast(false, 'Cannot upload file to NFT.Storage');
 
-        return;
+        return false;
     }
 
     let ipfsLink = `${ipfsGateway}${nftMetadata['ipnft']}/metadata.json`;
@@ -86,7 +86,7 @@ async function mintMyNFT() {
         logger('error', `Cannot load contract ABI (${r.status})`);
         showToast(false, 'Cannot mint NFT (ABI problem)');
         
-        return;
+        return false;
     }
     logger('debug', `Readed contract ABI successfully: ${contractABI}`);
 
@@ -115,7 +115,8 @@ async function mintMyNFT() {
         $('#minting-spinner').addClass('visually-hidden');
         $('#nftMint').prop('disabled', false);
         showToast(false, `SmartContract TX error!`);
-        return;
+        
+        return false;
     }
 
     logger('debug', `TX done: ${JSON.stringify(tx)}`);
@@ -136,6 +137,9 @@ $('#nftMint').on('click', async function(e) {
     
     e.preventDefault();
     let nftNumber = await mintMyNFT();
-    await addWalletAsset(String(nftNumber));
+
+    if (nftNumber) {
+        await addWalletAsset(String(nftNumber));
+    }
 
 });
