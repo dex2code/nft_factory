@@ -108,10 +108,8 @@ async function mintMyNFT() {
 
         return false;
     }
-    logger('debug', `Prepared Web3 objects successfully:`);
-    logger('debug', `Provider:  ${JSON.stringify(provider)}`);
+    logger('debug', `Prepared Web3 objects successfully.`);
     logger('debug', `Signer:  ${JSON.stringify(signer)}`);
-    logger('debug', `Contract: ${JSON.stringify(contract)}`);
 
 
     let tx, rc;
@@ -128,8 +126,6 @@ async function mintMyNFT() {
         return false;
     }
 
-    logger('debug', `TX done: ${JSON.stringify(tx)}`);
-    logger('debug', `RC data: ${JSON.stringify(rc)}`);
     logger('debug', `TX Returns: ${rc.logs[1]['data']}`);
     showToast(true, `Minted!`);
 
