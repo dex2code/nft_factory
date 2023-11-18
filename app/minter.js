@@ -132,19 +132,39 @@ async function mintMyNFT() {
     $('#minting-spinner').addClass('visually-hidden');
     $('#nftMint').prop('disabled', false);
 
+    let txNumber = tx.hash;
     let nftNumber = Number(rc.logs[1]['data']);
 
-    return nftNumber;
+    return {
+        nftId: nftNumber,
+        txId: txNumber
+    }
 }
 
 
 $('#nftMint').on('click', async function(e) {
     
     e.preventDefault();
-    let nftNumber = await mintMyNFT();
 
-    if (nftNumber) {
-        await addWalletAsset(String(nftNumber));
+    let mintedNFT = await mintMyNFT();
+
+    if (mintedNFT !== false) {
+
+        $('#modalWindowHead').text(`NFT Factory #${mintedNFT['nftId']}`);
+        $('#modalWindowBody').html(`
+            Your NFT has been successfully minted!<br /><br />
+            If your wallet doesn't support auto-discovery option, you can add it manually using the smartcontract address and token ID: <b>${mintedNFT['nftId']}</b><br /><br />
+            You can also find your NFT here: <a href="${appChainExplorer}/nft/${appSmartContract}/${mintedNFT['nftId']}" target="_blank">Explorer</a>
+        `);
+    
+        $('#modalWindowDiv').modal('show');
+    
+        await cropper.replace(cropper.originalUrl);
+
+        $('#nftName').val('');
+        $('#nftDescription').val('');
+
+        await addWalletAsset(String(mintedNFT['nftId']));
+
     }
-
 });
