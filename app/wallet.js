@@ -260,8 +260,6 @@ async function walletConnected() {
 
         $('#span-connect-wallet').text(displayWalletAccount);
 
-        $('#nftUpload').attr('disabled', false);
-
         window.ethereum.on('accountsChanged', handleAccountsChanged);
         window.ethereum.on('chainChanged', handleChainChanged);
 
@@ -296,8 +294,6 @@ async function disconnectWallet(toast = false) {
     $('#span-connect-wallet').text('');
     $('#btn-connect-wallet').off('click');
 
-    $('#nftUpload').attr('disabled', true);
-
     initWallet();
 
     return;
@@ -331,4 +327,37 @@ async function handleChainChanged() {
     }
 
     return;
+}
+
+
+async function addWalletAsset(nftNumber) {
+    logger('debug', `(addWalletAsset) -- Adding asset (${nftNumber}) to wallet...`);
+
+    try {
+
+        await window.ethereum.request({
+            method: 'wallet_watchAsset',
+            params: {
+                type: 'ERC721',
+                options: {
+                    address: appSmartContract,
+                    tokenId: nftNumber
+                }
+            }
+        });
+    
+    } catch (err) {
+
+        logger('warning', `(addWalletAsset) -- Cannot add asset (${err})`);
+        showToast(false, `Cannot add asset to your wallet. Try to add it manually by ID: ${Number(nftNumber)}.`);
+
+        return false;
+
+    }
+
+    logger('debug', `(addWalletAsset) -- Added successfully`);
+
+    return true;
+
+
 }

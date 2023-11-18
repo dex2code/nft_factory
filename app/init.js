@@ -27,6 +27,9 @@ $('#copy-smart-contract').on('click', async function() {
 });
 
 
+$('#link-smart-contract').on('click', function() { window.open(`${appChainExplorer}/address/${appSmartContract}`) } );
+
+
 const $imgCanvas = $('#imgCanvas');
 
 $imgCanvas.cropper({

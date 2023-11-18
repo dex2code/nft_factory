@@ -1,8 +1,8 @@
 /**
- *Submitted for verification at mumbai.polygonscan.com on 2023-11-17
+ *Submitted for verification at mumbai.polygonscan.com on 2023-11-18
 */
 
-// File: @openzeppelin/contracts/interfaces/draft-IERC6093.sol
+// File: @openzeppelin/contracts@5.0.0/interfaces/draft-IERC6093.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (interfaces/draft-IERC6093.sol)
@@ -166,7 +166,7 @@ interface IERC1155Errors {
     error ERC1155InvalidArrayLength(uint256 idsLength, uint256 valuesLength);
 }
 
-// File: @openzeppelin/contracts/utils/math/SignedMath.sol
+// File: @openzeppelin/contracts@5.0.0/utils/math/SignedMath.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (utils/math/SignedMath.sol)
@@ -212,7 +212,7 @@ library SignedMath {
     }
 }
 
-// File: @openzeppelin/contracts/utils/math/Math.sol
+// File: @openzeppelin/contracts@5.0.0/utils/math/Math.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (utils/math/Math.sol)
@@ -630,7 +630,7 @@ library Math {
     }
 }
 
-// File: @openzeppelin/contracts/utils/Strings.sol
+// File: @openzeppelin/contracts@5.0.0/utils/Strings.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (utils/Strings.sol)
@@ -726,7 +726,7 @@ library Strings {
     }
 }
 
-// File: @openzeppelin/contracts/utils/Context.sol
+// File: @openzeppelin/contracts@5.0.0/utils/Context.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (utils/Context.sol)
@@ -753,7 +753,230 @@ abstract contract Context {
     }
 }
 
-// File: @openzeppelin/contracts/token/ERC721/IERC721Receiver.sol
+// File: @openzeppelin/contracts@5.0.0/access/Ownable.sol
+
+
+// OpenZeppelin Contracts (last updated v5.0.0) (access/Ownable.sol)
+
+pragma solidity ^0.8.20;
+
+
+/**
+ * @dev Contract module which provides a basic access control mechanism, where
+ * there is an account (an owner) that can be granted exclusive access to
+ * specific functions.
+ *
+ * The initial owner is set to the address provided by the deployer. This can
+ * later be changed with {transferOwnership}.
+ *
+ * This module is used through inheritance. It will make available the modifier
+ * `onlyOwner`, which can be applied to your functions to restrict their use to
+ * the owner.
+ */
+abstract contract Ownable is Context {
+    address private _owner;
+
+    /**
+     * @dev The caller account is not authorized to perform an operation.
+     */
+    error OwnableUnauthorizedAccount(address account);
+
+    /**
+     * @dev The owner is not a valid owner account. (eg. `address(0)`)
+     */
+    error OwnableInvalidOwner(address owner);
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    /**
+     * @dev Initializes the contract setting the address provided by the deployer as the initial owner.
+     */
+    constructor(address initialOwner) {
+        if (initialOwner == address(0)) {
+            revert OwnableInvalidOwner(address(0));
+        }
+        _transferOwnership(initialOwner);
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        _checkOwner();
+        _;
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    /**
+     * @dev Throws if the sender is not the owner.
+     */
+    function _checkOwner() internal view virtual {
+        if (owner() != _msgSender()) {
+            revert OwnableUnauthorizedAccount(_msgSender());
+        }
+    }
+
+    /**
+     * @dev Leaves the contract without owner. It will not be possible to call
+     * `onlyOwner` functions. Can only be called by the current owner.
+     *
+     * NOTE: Renouncing ownership will leave the contract without an owner,
+     * thereby disabling any functionality that is only available to the owner.
+     */
+    function renounceOwnership() public virtual onlyOwner {
+        _transferOwnership(address(0));
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Can only be called by the current owner.
+     */
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        if (newOwner == address(0)) {
+            revert OwnableInvalidOwner(address(0));
+        }
+        _transferOwnership(newOwner);
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Internal function without access restriction.
+     */
+    function _transferOwnership(address newOwner) internal virtual {
+        address oldOwner = _owner;
+        _owner = newOwner;
+        emit OwnershipTransferred(oldOwner, newOwner);
+    }
+}
+
+// File: @openzeppelin/contracts@5.0.0/utils/Pausable.sol
+
+
+// OpenZeppelin Contracts (last updated v5.0.0) (utils/Pausable.sol)
+
+pragma solidity ^0.8.20;
+
+
+/**
+ * @dev Contract module which allows children to implement an emergency stop
+ * mechanism that can be triggered by an authorized account.
+ *
+ * This module is used through inheritance. It will make available the
+ * modifiers `whenNotPaused` and `whenPaused`, which can be applied to
+ * the functions of your contract. Note that they will not be pausable by
+ * simply including this module, only once the modifiers are put in place.
+ */
+abstract contract Pausable is Context {
+    bool private _paused;
+
+    /**
+     * @dev Emitted when the pause is triggered by `account`.
+     */
+    event Paused(address account);
+
+    /**
+     * @dev Emitted when the pause is lifted by `account`.
+     */
+    event Unpaused(address account);
+
+    /**
+     * @dev The operation failed because the contract is paused.
+     */
+    error EnforcedPause();
+
+    /**
+     * @dev The operation failed because the contract is not paused.
+     */
+    error ExpectedPause();
+
+    /**
+     * @dev Initializes the contract in unpaused state.
+     */
+    constructor() {
+        _paused = false;
+    }
+
+    /**
+     * @dev Modifier to make a function callable only when the contract is not paused.
+     *
+     * Requirements:
+     *
+     * - The contract must not be paused.
+     */
+    modifier whenNotPaused() {
+        _requireNotPaused();
+        _;
+    }
+
+    /**
+     * @dev Modifier to make a function callable only when the contract is paused.
+     *
+     * Requirements:
+     *
+     * - The contract must be paused.
+     */
+    modifier whenPaused() {
+        _requirePaused();
+        _;
+    }
+
+    /**
+     * @dev Returns true if the contract is paused, and false otherwise.
+     */
+    function paused() public view virtual returns (bool) {
+        return _paused;
+    }
+
+    /**
+     * @dev Throws if the contract is paused.
+     */
+    function _requireNotPaused() internal view virtual {
+        if (paused()) {
+            revert EnforcedPause();
+        }
+    }
+
+    /**
+     * @dev Throws if the contract is not paused.
+     */
+    function _requirePaused() internal view virtual {
+        if (!paused()) {
+            revert ExpectedPause();
+        }
+    }
+
+    /**
+     * @dev Triggers stopped state.
+     *
+     * Requirements:
+     *
+     * - The contract must not be paused.
+     */
+    function _pause() internal virtual whenNotPaused {
+        _paused = true;
+        emit Paused(_msgSender());
+    }
+
+    /**
+     * @dev Returns to normal state.
+     *
+     * Requirements:
+     *
+     * - The contract must be paused.
+     */
+    function _unpause() internal virtual whenPaused {
+        _paused = false;
+        emit Unpaused(_msgSender());
+    }
+}
+
+// File: @openzeppelin/contracts@5.0.0/token/ERC721/IERC721Receiver.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (token/ERC721/IERC721Receiver.sol)
@@ -784,7 +1007,7 @@ interface IERC721Receiver {
     ) external returns (bytes4);
 }
 
-// File: @openzeppelin/contracts/utils/introspection/IERC165.sol
+// File: @openzeppelin/contracts@5.0.0/utils/introspection/IERC165.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (utils/introspection/IERC165.sol)
@@ -812,7 +1035,7 @@ interface IERC165 {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
-// File: @openzeppelin/contracts/interfaces/IERC165.sol
+// File: @openzeppelin/contracts@5.0.0/interfaces/IERC165.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (interfaces/IERC165.sol)
@@ -820,7 +1043,7 @@ interface IERC165 {
 pragma solidity ^0.8.20;
 
 
-// File: @openzeppelin/contracts/utils/introspection/ERC165.sol
+// File: @openzeppelin/contracts@5.0.0/utils/introspection/ERC165.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (utils/introspection/ERC165.sol)
@@ -849,7 +1072,7 @@ abstract contract ERC165 is IERC165 {
     }
 }
 
-// File: @openzeppelin/contracts/token/ERC721/IERC721.sol
+// File: @openzeppelin/contracts@5.0.0/token/ERC721/IERC721.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (token/ERC721/IERC721.sol)
@@ -986,7 +1209,7 @@ interface IERC721 is IERC165 {
     function isApprovedForAll(address owner, address operator) external view returns (bool);
 }
 
-// File: @openzeppelin/contracts/interfaces/IERC721.sol
+// File: @openzeppelin/contracts@5.0.0/interfaces/IERC721.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (interfaces/IERC721.sol)
@@ -994,7 +1217,7 @@ interface IERC721 is IERC165 {
 pragma solidity ^0.8.20;
 
 
-// File: @openzeppelin/contracts/interfaces/IERC4906.sol
+// File: @openzeppelin/contracts@5.0.0/interfaces/IERC4906.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (interfaces/IERC4906.sol)
@@ -1016,7 +1239,7 @@ interface IERC4906 is IERC165, IERC721 {
     event BatchMetadataUpdate(uint256 _fromTokenId, uint256 _toTokenId);
 }
 
-// File: @openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol
+// File: @openzeppelin/contracts@5.0.0/token/ERC721/extensions/IERC721Metadata.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (token/ERC721/extensions/IERC721Metadata.sol)
@@ -1045,7 +1268,7 @@ interface IERC721Metadata is IERC721 {
     function tokenURI(uint256 tokenId) external view returns (string memory);
 }
 
-// File: @openzeppelin/contracts/token/ERC721/ERC721.sol
+// File: @openzeppelin/contracts@5.0.0/token/ERC721/ERC721.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (token/ERC721/ERC721.sol)
@@ -1530,7 +1753,46 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
     }
 }
 
-// File: @openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol
+// File: @openzeppelin/contracts@5.0.0/token/ERC721/extensions/ERC721Pausable.sol
+
+
+// OpenZeppelin Contracts (last updated v5.0.0) (token/ERC721/extensions/ERC721Pausable.sol)
+
+pragma solidity ^0.8.20;
+
+
+
+/**
+ * @dev ERC721 token with pausable token transfers, minting and burning.
+ *
+ * Useful for scenarios such as preventing trades until the end of an evaluation
+ * period, or having an emergency switch for freezing all token transfers in the
+ * event of a large bug.
+ *
+ * IMPORTANT: This contract does not include public pause and unpause functions. In
+ * addition to inheriting this contract, you must define both functions, invoking the
+ * {Pausable-_pause} and {Pausable-_unpause} internal functions, with appropriate
+ * access control, e.g. using {AccessControl} or {Ownable}. Not doing so will
+ * make the contract pause mechanism of the contract unreachable, and thus unusable.
+ */
+abstract contract ERC721Pausable is ERC721, Pausable {
+    /**
+     * @dev See {ERC721-_update}.
+     *
+     * Requirements:
+     *
+     * - the contract must not be paused.
+     */
+    function _update(
+        address to,
+        uint256 tokenId,
+        address auth
+    ) internal virtual override whenNotPaused returns (address) {
+        return super._update(to, tokenId, auth);
+    }
+}
+
+// File: @openzeppelin/contracts@5.0.0/token/ERC721/extensions/ERC721URIStorage.sol
 
 
 // OpenZeppelin Contracts (last updated v5.0.0) (token/ERC721/extensions/ERC721URIStorage.sol)
@@ -1593,36 +1855,71 @@ abstract contract ERC721URIStorage is IERC4906, ERC721 {
     }
 }
 
-// File: contracts/NFT_Factory.sol
-
+// File: contract-e27d3ca9df.sol
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
 
-
-contract NFT_Factory is ERC721, ERC721URIStorage {
-
+contract NFT_Factory is ERC721, ERC721URIStorage, ERC721Pausable, Ownable {
     uint256 private _nextTokenId;
 
-    constructor() ERC721("NFT_Factory", "NFT") {
+    constructor()
+        ERC721("NFT_Factory", "NFT")
+        Ownable(msg.sender)
+    {}
+
+    function pause()
+        public
+        onlyOwner
+    {
+        _pause();
     }
 
-    function safeMint(address to, string memory uri) public returns (uint256) {
+    function unpause()
+        public
+        onlyOwner
+    {
+        _unpause();
+    }
+
+    function safeMint(address to, string memory uri)
+        public
+        returns(uint256)
+    {
         uint256 tokenId = _nextTokenId++;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
 
-        return _nextTokenId;
+        return tokenId;
     }
 
     // The following functions are overrides required by Solidity.
 
-    function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+    function _update(address to, uint256 tokenId, address auth)
+        internal
+        override(ERC721, ERC721Pausable)
+        returns (address)
+    {
+        return super._update(to, tokenId, auth);
+    }
+
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override(ERC721, ERC721URIStorage)
+        returns (string memory)
+    {
         return super.tokenURI(tokenId);
     }
 
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721URIStorage) returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721URIStorage)
+        returns (bool)
+    {
         return super.supportsInterface(interfaceId);
     }
+
 }

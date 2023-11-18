@@ -10,7 +10,7 @@ var displayWalletAccount = null;
 const appDebug = true;
 
 
-const appSmartContract = '0x0123456789012345678901234567890123456789';
+const appSmartContract = '0x5d219F6Ccc32A812f2268200A0614EB7654c8E48';
 
 
 /*
@@ -37,3 +37,5 @@ const appChainCurrency = {
 
 
 const nftStorageKey = null;
+
+const ipfsGateway = 'https://ipfs.io/ipfs/';
