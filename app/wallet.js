@@ -8,7 +8,7 @@ async function getWalletAccounts() {
         walletAccounts = await window.ethereum.request(
             {
                 method: 'eth_requestAccounts',
-                params: [],
+                params: []
             });
 
     } catch (err) {
@@ -39,7 +39,7 @@ async function getWalletChainId() {
         walletChainId = await window.ethereum.request(
             {
                 method: 'eth_chainId',
-                params: [],
+                params: []
             });
     
     } catch (err) {
@@ -167,7 +167,7 @@ async function setWalletChainId() {
         await window.ethereum.request(
             {
                 method: 'wallet_switchEthereumChain',
-                params: [{ chainId: appChainId }],
+                params: [{ chainId: appChainId }]
             });
     
     } catch (err) {
@@ -216,7 +216,7 @@ async function addWalletChainId() {
 
         await window.ethereum.request({
             method: 'wallet_addEthereumChain',
-            params: [ chainDetails ],
+            params: [ chainDetails ]
         });
     
     } catch (err) {
