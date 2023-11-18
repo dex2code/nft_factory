@@ -158,7 +158,10 @@ $('#nftMint').on('click', async function(e) {
         `);
     
         $('#modalWindowDiv').modal('show');
-    
+
+        
+        $('#imgForm').get(0).reset();
+
         await cropper.replace(cropper.originalUrl);
 
         $('#nftName').val('');
