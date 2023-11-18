@@ -78,7 +78,7 @@ async function mintMyNFT() {
 
 
     let contractABI;
-    let r = await fetch('../contract/NFT_factory.abi.json');
+    let r = await fetch('contract/NFT_factory.abi.json');
 
     if (r.ok) {
         contractABI = await r.json();
